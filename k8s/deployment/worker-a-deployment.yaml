@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-a-deployment
+  namespace: ocr-dev
+  labels:
+    app: ocr-worker-a
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ocr-worker-a
+  template:
+    metadata:
+      labels:
+        app: ocr-worker-a
+    spec:
+      containers:
+      - name: worker-a-container
+        image: 192.168.64.17:5000/ocr-worker-a:latest
+        ports:
+        - containerPort: 8000
+        env:
+        # 💡 WORKER_ID와 TESSERACT_LANGS 설정
+        - name: WORKER_ID
+          value: "A"
+        - name: TESSERACT_LANGS
+          value: "eng"
+        - name: PREPROCESS_MODE
+          value: "STANDARD"
+        resources:
+          limits:
+            cpu: "1000m"
+          requests:
+            cpu: "500m"

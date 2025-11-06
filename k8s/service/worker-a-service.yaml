@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-a-service
+  namespace: ocr-dev
+spec:
+  type: ClusterIP # 💡 클러스터 내부에서만 접근 (Router에서만 호출)
+  selector:
+    app: ocr-worker-a
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000

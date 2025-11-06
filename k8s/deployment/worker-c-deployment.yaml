@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-c-deployment
+  namespace: ocr-dev
+  labels:
+    app: ocr-worker-c
+spec:
+  replicas: 1 # HPA가 최소 1개로 유지함
+  selector:
+    matchLabels:
+      app: ocr-worker-c
+  template:
+    metadata:
+      labels:
+        app: ocr-worker-c
+    spec:
+      containers:
+      - name: worker-c-container
+        image: 192.168.64.17:5000/ocr-worker-c:latest
+        ports:
+        - containerPort: 8000
+        env:
+        # 💡 WORKER_ID와 PREPROCESS_MODE 설정
+        - name: WORKER_ID
+          value: "C"
+        - name: TESSERACT_LANGS
+          value: "eng"
+        - name: PREPROCESS_MODE
+          value: "COMPLEX"
+        resources:
+          limits:
+            cpu: "2000m" # OpenCV 연산을 위해 CPU Limit을 높게 설정
+          requests:
+            cpu: "1000m" # HPA가 CPU 요청량을 기준으로 스케일링함

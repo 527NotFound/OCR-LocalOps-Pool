@@ -1,0 +1,43 @@
+# Multi-stage Build를 통한 최종 이미지 크기 최소화
+
+# 1. 빌드 스테이지: Tesseract 및 Python 패키지 설치
+FROM python:3.11-slim-bullseye AS builder
+
+# Tesseract OCR 엔진 설치 및 영어 팩만 설치
+# slim 이미지에 빌드 환경을 위한 도구 설치
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        tesseract-ocr \
+        tesseract-ocr-eng \
+        tesseract-ocr-dev \
+        libtesseract-dev \
+        gcc \
+        pkg-config && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY worker-app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 2. 최종 스테이지: 경량 런타임 이미지
+FROM python:3.11-slim-bullseye
+
+# Tesseract 런타임 환경 구성 (라이브러리와 영어 언어 팩만 복사)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        tesseract-ocr \
+        libtesseract5 \
+        tesseract-ocr-eng && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY worker-app /app
+
+# K8s 환경 변수 기본값 설정
+ENV WORKER_ID=A
+ENV TESSERACT_LANGS=eng
+ENV PREPROCESS_MODE=STANDARD
+
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

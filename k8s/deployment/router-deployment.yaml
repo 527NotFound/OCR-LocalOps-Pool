@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router-deployment
+  namespace: ocr-dev
+  labels:
+    app: ocr-router
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ocr-router
+  template:
+    metadata:
+      labels:
+        app: ocr-router
+    spec:
+      containers:
+      - name: ocr-router-container
+        # 💡 Jenkins에서 빌드/푸시할 이미지 주소
+        image: 192.168.64.17:5000/ocr-router:latest 
+        ports:
+        - containerPort: 8000
+        env:
+        # 워커 서비스 접근을 위한 K8s 내부 DNS 설정
+        - name: WORKER_A_SERVICE_URL
+          value: http://worker-a-service.ocr-dev:8000
+        - name: WORKER_B_SERVICE_URL
+          value: http://worker-b-service.ocr-dev:8000
+        - name: WORKER_C_SERVICE_URL
+          value: http://worker-c-service.ocr-dev:8000
+        resources:
+          limits:
+            cpu: "500m"
+          requests:
+            cpu: "250m"

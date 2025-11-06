@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-b-deployment
+  namespace: ocr-dev
+  labels:
+    app: ocr-worker-b
+spec:
+  replicas: 2 # 표준 워커로 2개의 복제본 유지
+  selector:
+    matchLabels:
+      app: ocr-worker-b
+  template:
+    metadata:
+      labels:
+        app: ocr-worker-b
+    spec:
+      containers:
+      - name: worker-b-container
+        # 💡 Jenkins에서 빌드/푸시할 이미지 주소 (Local Registry)
+        image: 192.168.64.17:5000/ocr-worker-b:latest
+        ports:
+        - containerPort: 8000
+        env:
+        # Worker B 설정: 다국어(eng+kor+jpn) 팩 사용 명시
+        - name: WORKER_ID
+          value: "B"
+        - name: TESSERACT_LANGS
+          value: "eng+kor+jpn"
+        - name: PREPROCESS_MODE
+          value: "STANDARD"
+        resources:
+          limits:
+            cpu: "1500m" # 다국어 팩과 표준 처리를 위해 Worker A보다 약간 높게 설정
+          requests:
+            cpu: "750m"

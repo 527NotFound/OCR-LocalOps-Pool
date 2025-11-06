@@ -1,0 +1,26 @@
+# OpenCV 설치를 위해 보다 안정적인 Debian Base 이미지 사용
+
+FROM python:3.11-bullseye
+
+# Tesseract (영어만) 및 OpenCV 빌드를 위한 의존성 설치
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        tesseract-ocr \
+        libtesseract5 \
+        tesseract-ocr-eng \
+        libgl1 \
+        libglib2.0-0 && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY worker-app/requirements.txt .
+# OpenCV 포함된 requirements.txt 설치
+RUN pip install --no-cache-dir -r requirements.txt
+COPY worker-app /app
+
+ENV WORKER_ID=C
+ENV TESSERACT_LANGS=eng
+ENV PREPROCESS_MODE=COMPLEX # 복잡한 전처리 모드 활성화
+
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,0 +1,19 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: worker-c-hpa
+  namespace: ocr-dev
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: worker-c-deployment
+  minReplicas: 1
+  maxReplicas: 5 # 최대 5개의 Worker C Pod으로 확장
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70 # CPU 사용률 70% 초과 시 스케일 아웃
