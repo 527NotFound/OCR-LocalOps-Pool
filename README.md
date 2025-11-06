@@ -1,5 +1,6 @@
 # 디렉토리 구조
 
+```md
 OCR-LocalOps-Pool/
 ├── .gitignore
 ├── Jenkinsfile                   # 메인 CI/CD 파이프라인 정의
@@ -37,3 +38,4 @@ OCR-LocalOps-Pool/
 └── scripts/                      # 환경 설정을 위한 스크립트
     ├── setup_k3s.sh              # Kali Linux VM에서 K3s 설치 스크립트
     └── setup_registry.sh         # Local Docker Registry 설정 스크립트
+```
